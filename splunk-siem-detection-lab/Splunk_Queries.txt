@@ -1,0 +1,35 @@
+# Splunk SIEM Detection Lab - SPL Queries
+
+Below are the custom Search Processing Language (SPL) queries developed to detect various stages of the cyber attack lifecycle within the homelab environment.
+
+---
+
+### 1. Reconnaissance: Nmap Port Scan Detection
+Visualizes a massive spike in network connections to the endpoint, indicating a port scan.
+```sql
+index=main source="*Sysmon*" EventCode=3 | timechart span=1h count
+```
+
+### 2. Initial Access: Hydra Brute Force / Failed Logon Storm
+Tracks a high volume of failed logon attempts (Event ID 4625) over a short period.
+```sql
+index=main EventCode=4625 | timechart count span=1h
+```
+
+### 3. Execution & C2: Metasploit Reverse Shell Callback
+Detects outbound network connections (Event ID 3) over port 4444 (default Metasploit port) originating from the Windows host to the Kali Linux attacker machine.
+```sql
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" DestinationPort=4444 | timechart count by DestinationIp
+```
+
+### 4. Credential Access: Mimikatz Execution Detection
+Detects the execution of Mimikatz (Event ID 1) regardless of the file name by analyzing the OriginalFileName metadata extracted by Sysmon.
+```sql
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" OriginalFileName="mimikatz.exe" | stats count
+```
+
+### 5. Forensics: Mimikatz Execution Details
+A statistical table providing deep forensic details on the Mimikatz execution, including the exact command line arguments and the integrity level of the process.
+```sql
+index=main "mimikatz" | table _time, CommandLine, Image, IntegrityLevel
+```
