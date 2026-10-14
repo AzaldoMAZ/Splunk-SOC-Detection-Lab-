@@ -17,12 +17,18 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ============================================================
 # CONFIG - edit only this block
 # ============================================================
-SPLUNK_HOST     = "https://localhost:8089"
-SPLUNK_USER     = "azaldo"
-SPLUNK_PASS     = "NiKe1234!"
+# Credentials are read from environment variables so no secrets are
+# stored in source control. Set them before running, for example:
+#   PowerShell: $env:SPLUNK_PASS = "..."   Bash: export SPLUNK_PASS="..."
+SPLUNK_HOST     = os.environ.get("SPLUNK_HOST", "https://localhost:8089")
+SPLUNK_USER     = os.environ.get("SPLUNK_USER", "")
+SPLUNK_PASS     = os.environ.get("SPLUNK_PASS", "")
 
-VIRUSTOTAL_KEY  = "7cb28dcd779767d4b4bd736eb8602c0bace5a7671966ba639e72fa7d85af2325"
-ABUSEIPDB_KEY   = "c11b21db008773ff55342a4fe468bea2b2cc06309741ef987a2bd3bd81c7109c12b4c881aa43d8"
+VIRUSTOTAL_KEY  = os.environ.get("VIRUSTOTAL_KEY", "")
+ABUSEIPDB_KEY   = os.environ.get("ABUSEIPDB_KEY", "")
+
+if not (SPLUNK_USER and SPLUNK_PASS and VIRUSTOTAL_KEY):
+    raise SystemExit("[!] Set SPLUNK_USER, SPLUNK_PASS and VIRUSTOTAL_KEY environment variables first.")
 
 ATTACKER_IP     = "192.168.56.101"
 PAYLOAD_NAME    = "hello.exe"
